@@ -8,3 +8,6 @@ hsenv.log
 cabal.sandbox.config
 *.prof
 .stack-work
+enwiktionary-********-pages-articles.xml.bz2
+/*.jsonl
+stack.yaml.lock

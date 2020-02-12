@@ -41,7 +41,10 @@ Then build this code with:
 stack clean
 stack build
 ```
-
+For macOS :
+```
+stack build --extra-lib-dirs=/usr/local/opt/icu4c/lib --extra-include-dirs=/usr/local/opt/icu4c/include
+```
 [stack]: https://github.com/commercialhaskell/stack
 
 The top-level programs are `wiki2text` and `wiktionary-parser`. `wiki2text`
