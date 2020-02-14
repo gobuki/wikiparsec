@@ -11,3 +11,4 @@ cabal.sandbox.config
 enwiktionary-********-pages-articles.xml.bz2
 /*.jsonl
 stack.yaml.lock
+.DS_Store
