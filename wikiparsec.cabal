@@ -31,7 +31,7 @@ Library
   build-depends:       HUnit,
                        base,
                        base-unicode-symbols,
-                       classy-prelude ==1.4.*,
+                       classy-prelude ==1.5.0,
                        string-conversions ==0.4.*,
                        utf8-string,
                        stringsearch,
@@ -61,7 +61,7 @@ Executable wiki2text
                        WikiPrelude
   build-depends:       base,
                        base-unicode-symbols,
-                       classy-prelude ==1.4.*,
+                       classy-prelude ==1.5.0,
                        string-conversions ==0.4.*,
                        utf8-string,
                        stringsearch,
@@ -91,7 +91,7 @@ Executable wp-summary
                        WikiPrelude
   build-depends:       base,
                        base-unicode-symbols,
-                       classy-prelude ==1.4.*,
+                       classy-prelude ==1.5.0,
                        string-conversions ==0.4.*,
                        utf8-string,
                        stringsearch,
@@ -121,7 +121,7 @@ Executable wp-links
                        WikiPrelude
   build-depends:       base,
                        base-unicode-symbols,
-                       classy-prelude ==1.4.*,
+                       classy-prelude ==1.5.0,
                        string-conversions ==0.4.*,
                        utf8-string,
                        stringsearch,
@@ -156,7 +156,7 @@ Executable wiktionary-parser
                        WikiPrelude
   build-depends:       base,
                        base-unicode-symbols,
-                       classy-prelude ==1.4.*,
+                       classy-prelude ==1.5.0,
                        string-conversions ==0.4.*,
                        utf8-string,
                        stringsearch,
