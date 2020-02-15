@@ -23,9 +23,10 @@ Library
                        Text.MediaWiki.Wiktionary.French,
                        Text.MediaWiki.Wiktionary.German,
                        WikiPrelude
+                       Text.MediaWiki.Sections 
   other-modules:       Data.LanguageNamesData, Text.MediaWiki.ParseTools,
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
-                       Text.MediaWiki.Templates, Text.MediaWiki.Sections,
+                       Text.MediaWiki.Templates,
                        Text.MediaWiki.HTML,
                        Data.LanguageType, Data.LanguageNames
   build-depends:       HUnit,
