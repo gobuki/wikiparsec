@@ -105,20 +105,20 @@ build on those. (The reference implementation -- MediaWiki itself -- would be a
 great example, but so are the various Java-based parsers I've seen.) So the
 next best choice is Haskell.
 
-This looks like Markdown, where's the code?
+~~This looks like Markdown, where's the code?~~
 -------------------------------------------
 
-One thing I love about Haskell is the Literate Haskell (`.lhs`) format. The
+~~One thing I love about Haskell is the Literate Haskell (`.lhs`) format. The
 Haskell compiler can interpret it without any pre-processing, and it encourages
-documentation as the rule and code as the exception.
+documentation as the rule and code as the exception.~~
 
-Lines that start with the character `>` are code. The rest is Markdown. The
+~~Lines that start with the character `>` are code. The rest is Markdown. The
 documentation tool `pandoc` can convert this all into nicely-formatted HTML,
 which you might even be reading right now, but just reading the Markdown +
-Haskell source should do the job too.
+Haskell source should do the job too.~~
 
-You could start reading with `WikiPrelude.lhs`, which sets up the functions
-we want to be available in all our modules, or `Text/Wiki/MediaWiki.lhs`,
+You could start reading with `WikiPrelude.hs`, which sets up the functions
+we want to be available in all our modules, or `Text/Wiki/MediaWiki.hs`,
 which performs the basic level of parsing for MediaWiki syntax.
 
 Ideally, this documentation is written with a target audience of people who
