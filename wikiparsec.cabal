@@ -52,7 +52,7 @@ Executable wiki2text
   ghc-options:
     -threaded
     -O2
-  main-is:             cmd/Wiki2Text.lhs
+  main-is:             cmd/Wiki2Text.hs
   other-modules:       Data.LanguageNamesData, Text.MediaWiki.ParseTools,
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
@@ -82,7 +82,7 @@ Executable wp-summary
   ghc-options:
     -threaded
     -O2
-  main-is:             cmd/WikipediaSummary.lhs
+  main-is:             cmd/WikipediaSummary.hs
   other-modules:       Data.LanguageNamesData, Text.MediaWiki.ParseTools,
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
@@ -112,7 +112,7 @@ Executable wp-links
   ghc-options:
     -threaded
     -O2
-  main-is:             cmd/WikipediaLinks.lhs
+  main-is:             cmd/WikipediaLinks.hs
   other-modules:       Data.LanguageNamesData, Text.MediaWiki.ParseTools,
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
@@ -142,7 +142,7 @@ Executable wiktionary-parser
   ghc-options:
     -threaded
     -O2
-  main-is:             cmd/WiktionaryParser.lhs
+  main-is:             cmd/WiktionaryParser.hs
   other-modules:       Data.LanguageNamesData, Text.MediaWiki.ParseTools,
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
