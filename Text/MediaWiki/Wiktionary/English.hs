@@ -390,6 +390,25 @@ handleEtylTemplate t = annotationBuilder $ do
   adapt "language" arg1 t
   invisible
 
+
+-- 
+handleKoEtymSinoTemplate :: Template -> AnnotatedText
+handleKoEtymSinoTemplate t = annotationBuilder $ do
+  put "rel" "*derived/etym"
+  put "language" "-"
+  put "sense" "sino-korean"
+  let hanja = (concat . takeEvenIndices) $ snd <$> (drop 1 t)
+  put "page" hanja
+  invisible
+  where 
+    f next (isEven, list) = 
+            if isEven
+                then (not isEven, next : list)
+                else (not isEven, list)
+    takeEvenIndices xs = snd $ foldr f (odd (length xs) ,[]) xs
+
+
+
 -- The `{{compound}}` template can look like this:
 
 --     {{compound|en|place|holder}}
@@ -634,6 +653,7 @@ enTemplates "suffix"    = handleSuffixTemplate
 enTemplates "compound"  = handleCompoundTemplate
 enTemplates "blend"     = handleCompoundTemplate
 enTemplates "etyl"      = handleEtylTemplate
+enTemplates "ko-etym-Sino" = handleKoEtymSinoTemplate
 enTemplates "label"     = handleLabelTemplate
 enTemplates "lbl"       = handleLabelTemplate
 enTemplates "lb"        = handleLabelTemplate
