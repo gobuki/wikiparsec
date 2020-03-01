@@ -29,6 +29,8 @@ Library
                        Text.MediaWiki.Templates,
                        Text.MediaWiki.HTML,
                        Data.LanguageType, Data.LanguageNames
+                       Text.MediaWiki.Wiktionary.PronunciationTemplates.English.CJK
+                       Data.Pronunciation.EnWiktionary.CH_TW 
   build-depends:       HUnit,
                        base,
                        base-unicode-symbols,

@@ -9,7 +9,7 @@
 -- Export only the top-level, namespaced functions.
 
 module Text.MediaWiki.Wiktionary.English
-  (enParseWiktionary, enTemplates, enParseRelation, enParseEtymology) where
+  (templateExample, enParseWiktionary, enTemplates, enParseRelation, enParseEtymology) where
 import WikiPrelude
 import Text.MediaWiki.Templates
 import Text.MediaWiki.AnnotatedText
@@ -21,6 +21,37 @@ import Text.MediaWiki.Wiktionary.Base
 import Data.Attoparsec.Text
 import Data.LanguageNames
 
+
+
+
+-- THIS ZONE IS TO WRITE PLAYGROUND CODE AS I EDIT>>> TEMPORARY
+
+import Text.Show.Unicode
+templateExample :: IO ()
+templateExample = do
+  let templateString = "{{t|ja|{{ja-r|真名|まな}}|tr=[[たとえ]], tatoe}}"
+      pTemplate = template enTemplates
+      temp = parseOnly pTemplate (templateString)
+
+      -- temp = parseOnly pTemplate ("{{zh-pron\n\
+      --                           \|m=húqín,tl=y\n\
+      --                           \|c=wu4 kam4\
+      --                           \|mn=ô͘-khîm\
+      --                           \|w=3hhu jjin\
+      --                           \|cat=n\
+      --                           \}}\
+      --                           \")
+  print ""
+  uprint templateString
+  uprint temp
+  print ""
+  return ()
+
+-- END OF PLAYGROUND
+
+
+
+  
 -- 
 -- Parsing entire pages
 -- --------------------
@@ -56,13 +87,15 @@ enParseSection title (WikiSection {headings=headings, content=content}) =
       let language    = lookupLanguage "en" langHeading
           maybePos    = findPartOfSpeech subheads
           etymNumber  = findEtymologyNumber subheads
+          pronunNumber = findPronunciationNumber subheads
           sectionType = getSectionType subheads
           thisTerm    = WiktionaryTerm {
                           wtText=title,
                           wtLanguage=Just language,
                           wtEtym=Just etymNumber,
                           wtPos=partOfSpeechMap <$> maybePos,
-                          wtSense=Nothing
+                          wtSense=Nothing,
+                          wtPronun=Just pronunNumber
                           }
       in chooseSectionParser sectionType thisTerm content
 
@@ -147,10 +180,21 @@ pTransBottom = specificTemplate enTemplates "trans-bottom" >> return ()
 -- link to another word. We parse the section using `sectionAnnotated`, extract
 -- the links, and create "related/etym" relations from them.
 
-enParseEtymology :: WiktionaryTerm -> Text -> [WiktionaryFact]
+enParseEtymology :: WiktionaryTerm -> Text -> [WiktionaryFact] 
 enParseEtymology thisTerm text =
   let etymParsed = parseOrDefault mempty (sectionAnnotated enTemplates) text
       annots = languageTaggedAnnotations etymParsed
+      facts = map (annotationToFact "en" thisTerm) annots
+  in map (assignRel "related/etym") facts
+
+
+-- In a pronunciation section, we extract information from a limited 
+-- set of known, language-specific pronunciation templates -- defined farther below
+-- TODO : add and maintain pronunciation templates
+enParsePronunciation :: WiktionaryTerm -> Text -> [WiktionaryFact] 
+enParsePronunciation thisTerm text =
+  let pronunParsed = parseOrDefault mempty (sectionAnnotated enTemplates) text
+      annots = pronunciationTaggedAnnotations pronunParsed
       facts = map (annotationToFact "en" thisTerm) annots
   in map (assignRel "related/etym") facts
 
@@ -193,6 +237,12 @@ findEtymologyNumber headings =
     Just x -> x
     Nothing -> "1"
 
+findPronunciationNumber :: [Text] -> Text
+findPronunciationNumber headings =
+  case findPrefixedHeading "Pronunciation " headings of
+    Just x -> x
+    Nothing -> "1"
+
 -- Generalizing the type of a heading:
 
 getSectionType :: [Text] -> Text
@@ -204,7 +254,9 @@ getSectionType headings =
         then "POS"
         else if isPrefixOf "Etymology " heading
           then "Etymology"
-          else heading
+        else if isPrefixOf "Pronunciation " heading
+          then "Pronunciation"
+        else heading
 
 -- 
 -- Evaluating templates
@@ -389,6 +441,105 @@ handleEtylTemplate t = annotationBuilder $ do
   put "page" "-"
   adapt "language" arg1 t
   invisible
+
+
+-- 
+-- Pronunciations
+-- -----
+
+-- pronunciationSystems = setFromList [
+--   "TODO" --??
+-- ]
+
+
+-- The {{zh-pron}} template is used to to display pronunciation information
+-- for several Chinese languages and transcription systems.   
+-- The template relies  on complex rules and even lookups to
+-- third-party reference materials (i.e. Old Chinese reconstructions). Recreating 
+-- all pronunciations as displayed on Wiktionary is therefore non-trivial -- instead 
+-- we focus on select cases where helpful pronunciation information can easily 
+-- be extracted from the raw Wikitext template. Other resources may be able to provide
+-- more complete conversions, but we attempt a minimum here because 
+-- pronunciation differences sometimes map onto meanings extracted by our parser 
+-- (i.e. see 'wéi' and 'wèi' for '為')
+
+-- Note : Mandarin Tone Sandhi
+-- We ignore tone sandhi variations. For example in Mandarin Pinyin we always 
+-- display '一' and '不' as 'ī' and 'bù'. We also ignore sequential third tone 
+-- sandhis, and any blocking thereof. (As of writing, English Wiktionary's parser
+-- does not distinguish tone sandhis either, even though the documentation 
+-- suggests otherwise.)
+--
+-- Examples :
+--  (..)  "|m=不shì"          -> "bùshì"
+--  (..)  "|m=búshì"          -> "búshì"
+--  (..)  "|m=lǎohǔ"          ->  "lǎohǔ"
+--  (..)  "|m=一 bǎ #hǎoshǒu"  ->  "yī bǎ hǎoshǒu"
+
+-- Note : Mandarin regional variation
+-- The template documentation calls for characters with regional pronunciation 
+-- variations (i.e.  危, 血) to be left as-is in the pronunciation field 
+-- （i.e. “危xiǎn”，“血yā”, etc.）, to be parsed by Wiktionary's modules.
+-- 
+-- We perform the regional pronunciation conversions for standard Mainland and Taiwanese 
+-- pronunciations by parsing the same data that Wiktionary uses at 
+-- https://en.wiktionary.org/wiki/Module:zh/data/cmn-tag (not continuously updated). 
+-- We also include the original string with the non-disambiguated
+-- Chinese character so that users of this parser
+-- can perform their own regional conversions as they see fit. Other 
+-- regional/dialectal variations for Mandarin besides Mainland and Taiwan are not included.
+--
+-- Examples :
+--  TODO
+-- 
+-- 
+
+-- Otherwise :
+-- We omit several Chinese languages, dialects, and transcription systems.
+-- Where feasible to handle the pronunciation, we parse according to the rules 
+-- in the template's documentation, not the actual implementation
+-- in Wiktionary's PHP and Lua modules.
+--
+-- Examples :
+--  TODO
+
+
+
+
+
+
+
+--  ->  "危xiǎn"
+-- --  (..)  "|m=血yā". We leave 
+-- -- the original pre-disambiguated character.
+-- --
+-- -- Examples :
+-- --  (..)  "|m=危xiǎn"   ->  "危xiǎn"
+-- --  (..)  "|m=血yā"     ->  "血yā"
+-- -- 
+-- -- Users of this parser should perform their own conversions to the regional 
+-- -- pronunciations that interest them. (Warning : users should take care that 
+-- -- their regional conversions correspond to the correct definition/sense, 
+-- -- which may or may not map conveniently)
+-- -- 
+
+
+
+
+
+
+
+
+
+
+-- See :
+-- https://en.wiktionary.org/wiki/Template:zh-pron
+-- 
+
+
+
+
+
 
 -- The `{{compound}}` template can look like this:
 

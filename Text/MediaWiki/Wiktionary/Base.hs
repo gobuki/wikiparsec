@@ -40,7 +40,8 @@ data WiktionaryTerm = WiktionaryTerm {
   wtLanguage :: Maybe Language,
   wtSense :: Maybe Text,
   wtPos :: Maybe Text,
-  wtEtym :: Maybe Text
+  wtEtym :: Maybe Text,
+  wtPronun :: Maybe Text
 } deriving (Eq)
 
 --We export a term to JSON by constructing an object that associates keys with
@@ -87,6 +88,7 @@ instance Show WiktionaryTerm where
 --- Element 2: the part of speech
 --- Element 3: the etymology label
 --- Element 4: the sense label
+--- Element 5 : the pronunciation label
 
 --Elements after the end of the list will become `Nothing`. Elements in the middle
 --can also be set to `Nothing` by giving the empty string as their value. (This is
@@ -100,7 +102,8 @@ term items =
       wtLanguage = toLanguage <$> (index items 1),
       wtPos = nonEmpty (index items 2),
       wtEtym = nonEmpty (index items 3),
-      wtSense = nonEmpty (index items 4)
+      wtSense = nonEmpty (index items 4),
+      wtPronun = nonEmpty (index items 5)
       }
 
 --Two more constructors for straightforward cases. `simpleTerm` takes in the language code and
@@ -210,6 +213,12 @@ languageTaggedAnnotation annot = linkableAnnotation annot && (get "language" ann
 languageTaggedAnnotations :: AnnotatedText -> [Annotation]
 languageTaggedAnnotations atext = filter languageTaggedAnnotation (getAnnotations atext)
 
+pronunciationTaggedAnnotation :: Annotation -> Bool
+pronunciationTaggedAnnotation annot = False --TEMPORARY!!
+
+pronunciationTaggedAnnotations :: AnnotatedText -> [Annotation]
+pronunciationTaggedAnnotations atext = filter pronunciationTaggedAnnotation (getAnnotations atext) 
+
 --You might notice that these Annotations contain most of the information we need for a
 --WiktionaryTerm. Is the target of a linkableAnnotation just a WiktionaryTerm?
 
@@ -269,7 +278,8 @@ annotationToTerm thisLang annot =
       wtLanguage=maybeLanguage,
       wtPos=(lookup "pos" annot),
       wtEtym=(lookup "etym" annot),
-      wtSense=(lookup "sense" annot)
+      wtSense=(lookup "sense" annot),
+      wtPronun=(lookup "pronun" annot)
     }
 
 --These helper functions get the language of an Annotation, if possible, either
@@ -935,10 +945,10 @@ findPrefixedHeading prefix headings =
 --placeholder text "POS".
 
 --So now let's implement this using the tools Haskell gives us.  `put` is our
---monoid-monad thing that uses `writer` to assemble a state using do-notation. We
---also want the values to be a Monoid, so we can check if they're empty. If a
+--monoid-monad thing that uses `wroid, so we can check if they're empty. If a
 --value is empty, we do nothing to the state (we append `ø`). If the value is
---present, we append a map that just maps `key` to `value`, and the effect of
+--present, we append a map that just maps `key`iter` to assemble a state using do-notation. We
+--also want the values to be a Mon to `value`, and the effect of
 --that is to map `key` to `value` in the state.
 
 put :: (IsMap map, Monoid (MapValue map), Eq (MapValue map)) => ContainerKey map -> MapValue map -> Writer map (MapValue map)
