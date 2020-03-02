@@ -1,0 +1,40 @@
+==Some Other Language==
+
+===Etymology===
+
+====Verb====
+
+# Ignore Me
+
+==Korean==
+
+===Alternative forms===
+* {{ko-l|녀자}} {{qualifier|North Korea}}
+
+===Etymology===
+{{ko-etym-Sino|女|female|子|offspring}}
+
+===Pronunciation===
+{{ko-IPA}}
+
+===Noun===
+{{ko-noun|hanja=女子}}
+
+# [[woman]]; [[girl]]; [[lady]]; [[female]]
+
+====Synonyms====
+* {{ko-l|계집||woman; girl}}
+* {{ko-l|아내||wife}}
+* {{ko-l|여성|女性|yeoseong|female}}
+
+====Antonyms====
+* {{ko-l|사내||man; husband}}
+* {{ko-l|남자|男子|namja|man, male}}
+* {{ko-l|남성|男性|namseong|male}}
+
+====Related terms====
+* {{ko-l|남녀|男女|men and women}}
+
+====See also====
+* {{ko-l|어른||adult}}
+* {{ko-l|아이||child}}

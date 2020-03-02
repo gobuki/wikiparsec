@@ -20,6 +20,7 @@ import Text.MediaWiki.WikiText
 import Text.MediaWiki.Wiktionary.Base
 import Data.Attoparsec.Text
 import Data.LanguageNames
+import Data.Unicode (isChinese)
 
 -- 
 -- Parsing entire pages
@@ -391,7 +392,13 @@ handleEtylTemplate t = annotationBuilder $ do
   invisible
 
 
+-- The hanja reading of the ko-etym-Sino template is handled by
+-- extracting only the hanja elements of the alternating hanja/meaning fields
 -- 
+-- Note that the language is left as "-" because the actual etymological origin
+-- may not necessarily be Chinese, or it may be an unspecified language/dialect/stage
+-- of Chinese. For the time being we use the wtSense field of WiktionaryTerm
+-- to hold the label "sino-korean"
 handleKoEtymSinoTemplate :: Template -> AnnotatedText
 handleKoEtymSinoTemplate t = annotationBuilder $ do
   put "rel" "*derived/etym"
@@ -407,6 +414,26 @@ handleKoEtymSinoTemplate t = annotationBuilder $ do
                 else (not isEven, list)
     takeEvenIndices xs = snd $ foldr f (odd (length xs) ,[]) xs
 
+
+-- We extract hanja from the ko-l template by taking the first 
+-- field that contains exclusively Chinese characters. The actual
+-- Wiktionary template module might be more complex, but this should
+-- work for most cases.
+--
+-- As with ko-etym-Sino, we leave the language field as "-" and 
+-- store the label "sino-korean" in the wtSense field of WiktionaryTerm
+
+handleKoLTemplate ::  Template -> AnnotatedText
+handleKoLTemplate t = 
+  let hanjaM = find (\s -> length s > 0 && all isChinese s ) (snd <$> t) in
+  case hanjaM of
+    Just hanja -> annotationBuilder $ do 
+                      put "rel" "*derived/etym"
+                      put "language" "-"
+                      put "sense" "sino-korean"
+                      put "page" hanja
+                      invisible
+    Nothing -> annotationBuilder invisible
 
 
 -- The `{{compound}}` template can look like this:

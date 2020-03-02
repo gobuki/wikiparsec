@@ -28,7 +28,7 @@ Library
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates,
                        Text.MediaWiki.HTML,
-                       Data.LanguageType, Data.LanguageNames
+                       Data.LanguageType, Data.LanguageNames, Data.Unicode
   build-depends:       HUnit,
                        base,
                        base-unicode-symbols,
@@ -57,7 +57,7 @@ Executable wiki2text
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
                        Text.MediaWiki.HTML, Text.MediaWiki.XML,
-                       Data.LanguageType, Data.LanguageNames,
+                       Data.LanguageType, Data.LanguageNames, Data.Unicode,
                        Text.MediaWiki.WikiText,
                        WikiPrelude
   build-depends:       base,
@@ -87,7 +87,7 @@ Executable wp-summary
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
                        Text.MediaWiki.HTML, Text.MediaWiki.XML,
-                       Data.LanguageType, Data.LanguageNames,
+                       Data.LanguageType, Data.LanguageNames, Data.Unicode,
                        Text.MediaWiki.WikiText,
                        WikiPrelude
   build-depends:       base,
@@ -117,7 +117,7 @@ Executable wp-links
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
                        Text.MediaWiki.HTML, Text.MediaWiki.XML,
-                       Data.LanguageType, Data.LanguageNames,
+                       Data.LanguageType, Data.LanguageNames, Data.Unicode,
                        Text.MediaWiki.WikiText,
                        WikiPrelude
   build-depends:       base,
@@ -147,7 +147,7 @@ Executable wiktionary-parser
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates, Text.MediaWiki.Sections,
                        Text.MediaWiki.HTML, Text.MediaWiki.XML,
-                       Data.LanguageType, Data.LanguageNames,
+                       Data.LanguageType, Data.LanguageNames, Data.Unicode,
                        Text.MediaWiki.WikiText,
                        Text.MediaWiki.Wiktionary.Base,
                        Text.MediaWiki.Wiktionary.English,
