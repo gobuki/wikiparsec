@@ -123,6 +123,7 @@ joinAnnotatedLines ats =
 
 transformA :: (Text -> Text) -> AnnotatedText -> AnnotatedText
 transformA op (AnnotatedText a t) = AnnotatedText a (op t)
+transformA _ (TextlessAnnotation a) = TextlessAnnotation a
 
 -- We can use a string literal as an AnnotatedText. `pack` converts Haskell's
 -- shitty built-in `String` type to `Text`, and `annotFromText` converts that

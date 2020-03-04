@@ -488,6 +488,8 @@ extractFirstLink _ = []
 limitAnnotationToFirstLink :: AnnotatedText -> AnnotatedText
 limitAnnotationToFirstLink (AnnotatedText annos text) =
   AnnotatedText (filterForFirstLink annos []) text
+limitAnnotationToFirstLink (TextlessAnnotation annos) = 
+  TextlessAnnotation (filterForFirstLink annos [])
 
 -- `filterForFirstLink` is used in implementing `limitAnnotationToFirstLink`,
 -- scanning the annotation list of an AnnotatedText and keeping only those up to
@@ -699,6 +701,9 @@ inspectText input =
     Left err -> showError input err
     Right (AnnotatedText annos text) -> do
       putStrLn text
+      print annos
+    Right (TextlessAnnotation annos) -> do
+      putStrLn ""
       print annos
 
 -- `inspectString` is designed to be usable from the REPL, where OverloadedStrings
