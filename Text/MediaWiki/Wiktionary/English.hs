@@ -9,7 +9,7 @@
 -- Export only the top-level, namespaced functions.
 
 module Text.MediaWiki.Wiktionary.English
-  (enParseWiktionary, enTemplates, enParseRelation, enParseEtymology) where
+  (enParseWiktionary, enTemplates, enParseRelation, enParseEtymology, testParse) where
 import WikiPrelude
 import Text.MediaWiki.Templates
 import Text.MediaWiki.AnnotatedText
@@ -21,6 +21,16 @@ import Text.MediaWiki.Wiktionary.Base
 import Data.Attoparsec.Text
 import Data.LanguageNames
 import Data.Unicode (isChinese)
+
+--TEMPORARY
+import qualified Data.Text.IO as IO 
+testParse :: Text -> IO ()
+testParse fileName = do
+  text <- IO.readFile (unpack fileName)
+  let title = fst $ splitFirst "." fileName
+  let facts = enParseWiktionary title text
+  print facts
+
 
 -- 
 -- Parsing entire pages
@@ -714,6 +724,14 @@ enTemplates "der4" = handleUnboundedTemplate "derived" "en"
 enTemplates "der5" = handleUnboundedTemplate "derived" "en"
 enTemplates "zh-der" = handleUnboundedTemplate "derived" "zh"
 
+-- templates that would invalidate all surounding text content
+-- if simply ignored
+-- e.g. we don't want :
+--          "specifically {{taxlink|Potamogeton oxyphyllus|species|noshow=1}}."
+--      to end up as :
+--          "specifically ." (ungrammatical)
+enTemplates "taxlink" = const (TextlessAnnotation [])
+
 -- Should these be handled in more detail than just extracting their text?
 enTemplates "initialism of"       = useArg "1"
 enTemplates "acronym of"          = useArg "1"
@@ -776,3 +794,4 @@ enTemplates x
   | isPrefixOf "sv-verb-form" x = handleSwedishFormTemplate
   | otherwise                   = skipTemplate
 -- 
+

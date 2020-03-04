@@ -47,6 +47,8 @@ Library
                        fast-tagsoup-utf8-only,
                        hexpat ==0.20.*,
                        aeson
+  ghc-options:
+    -fwarn-incomplete-patterns
 
 Executable wiki2text
   ghc-options:

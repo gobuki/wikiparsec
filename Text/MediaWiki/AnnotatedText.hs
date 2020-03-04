@@ -29,7 +29,13 @@ filterEmpty (a, b) = b /= ""
 -- So what we need to keep track of in an AnnotatedText is one string (as a
 -- Text) and a list of Annotations for it.
 
-data AnnotatedText = AnnotatedText [Annotation] Text deriving (Show, Eq)
+-- The constructor TextlessAnnotation is available when you want to force getText to be "",
+-- and for any concatenations with other AnnotatedText to also result in a textless value. 
+-- e.g.:
+--  concat (AnnotatedText [a1] b1) (TextlessAnnotation [a2]) = TextlessAnnotation [a1,a2]
+
+data AnnotatedText = AnnotatedText [Annotation] Text 
+                    | TextlessAnnotation [Annotation] deriving (Show, Eq)
 
 annotate :: [Annotation] -> Text -> AnnotatedText
 annotate annos t = AnnotatedText annos t
@@ -38,10 +44,11 @@ annotate annos t = AnnotatedText annos t
 
 getAnnotations :: AnnotatedText -> [Annotation]
 getAnnotations (AnnotatedText annos t) = annos
+getAnnotations (TextlessAnnotation annos) = annos
 
 getText :: AnnotatedText -> Text
 getText (AnnotatedText annos t) = t
-
+getText (TextlessAnnotation _) = ""
 -- Links
 -- -----
 
@@ -96,7 +103,13 @@ singleAnnotation key val = annotate [singletonMap key val] ""
 instance Semigroup AnnotatedText where
   (AnnotatedText a1 t1) <> (AnnotatedText a2 t2)
     = AnnotatedText (a1 ++ a2) (t1 ++ t2)
-
+  (AnnotatedText a1 t1) <> (TextlessAnnotation a2)
+    = TextlessAnnotation (a1 ++ a2)
+  (TextlessAnnotation a1) <> (AnnotatedText a2 t2)
+    = TextlessAnnotation (a1 ++ a2)
+  (TextlessAnnotation a1) <> (TextlessAnnotation a2)
+    = TextlessAnnotation (a1 ++ a2)
+    
 instance Monoid AnnotatedText where
   mempty  = annotFromText ""
 
