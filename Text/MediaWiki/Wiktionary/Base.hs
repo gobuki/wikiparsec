@@ -17,9 +17,11 @@ import Data.Attoparsec.Combinator
 import Data.Aeson (ToJSON, toJSON, (.=), encode, object)
 import Data.LanguageNames
 import Data.LanguageType
+import Data.Maybe (isNothing)
 import Text.Language.Normalize (normalizeText)
 import Text.MediaWiki.HTML (extractWikiTextFromHTML)
 import Text.Show.Unicode
+import qualified Data.Map as M
 
 --The `WiktionaryTerm` data type
 --------------------------------
@@ -343,7 +345,7 @@ findSenseIDInList [] = Nothing
 
 parseDefinitions :: Language -> TemplateProc -> WiktionaryTerm -> Text -> [WiktionaryFact]
 parseDefinitions language tproc thisTerm text =
-  let parser = skipMiscellaneousLines (pNumberedDefinitionList tproc)
+  let parser = skipMiscellaneousLines (pNumberedDefinitionList language tproc)
       defs = parseOrDefault [] parser text
   in concat (map (definitionToFacts language thisTerm) defs)
 
@@ -367,8 +369,8 @@ skipMiscellaneousLines parser =
   (newLine >> skipMiscellaneousLines parser) <|>
   (wikiTextLine ignoreTemplates >> newLine >> skipMiscellaneousLines parser)
 
-pNumberedDefinitionList :: TemplateProc -> Parser [LabeledDef]
-pNumberedDefinitionList tproc = extractNumberedDefs <$> orderedList tproc "#"
+pNumberedDefinitionList :: Language -> TemplateProc -> Parser [LabeledDef]
+pNumberedDefinitionList language tproc = (extractNumberedDefs language) <$> orderedList tproc "#"
 
 --Parsing an ordered list as a definition list involves running the `orderedList`
 --parser (from `Text.MediaWiki.WikiText`), then passing the result to
@@ -391,12 +393,12 @@ type LabeledDef = (Text, AnnotatedText)
 
 --First we define how to start this iterative process:
 
-extractNumberedDefs :: ListItem -> [LabeledDef]
-extractNumberedDefs = extractNumbered "def"
+extractNumberedDefs :: Language -> ListItem -> [LabeledDef]
+extractNumberedDefs language = extractNumbered language "def"
 
-extractNumbered :: Text -> ListItem -> [LabeledDef]
-extractNumbered prefix (OrderedList items) = extractNumberedIter prefix 1 items
-extractNumbered prefix _ = error "Wrong type of list"
+extractNumbered :: Language -> Text -> ListItem -> [LabeledDef]
+extractNumbered language prefix (OrderedList items) = extractNumberedIter language prefix 1 items
+extractNumbered language prefix _ = error "Wrong type of list"
 
 --The first case we handle is an item that introduces a sub-list. The sub-list gets
 --the item's label as its prefix.
@@ -404,18 +406,78 @@ extractNumbered prefix _ = error "Wrong type of list"
 --After that, we handle normal items, sub-lists that aren't OrderedLists which we
 --ignore, and the base case at the end of the list.
 
-extractNumberedIter :: Text -> Int -> [ListItem] -> [LabeledDef]
-extractNumberedIter prefix counter list =
-  let newPrefix = mconcat [prefix, ".", cs (show counter)]
-  in case list of
-    ((Item item):(OrderedList items):rest) -> (newPrefix, item):(
-                                                (extractNumberedIter newPrefix 1 items)
-                                                ++ (extractNumberedIter prefix (counter + 1) rest)
-                                                )
-    ((Item item):rest)                     -> (newPrefix, item):(extractNumberedIter prefix (counter + 1) rest)
-    _:rest                                 -> extractNumberedIter prefix counter rest
-    []                                     -> []
+-- TODO:
+--  -German examples handled in own "Beispiele" section
+--  -Is it possible to use multicase pattern matching for "en" and "fr" examples?
+--
 
+extractNumberedIter :: Language -> Text -> Int -> [ListItem] -> [LabeledDef]
+extractNumberedIter language prefix counter list =
+  let newPrefix = mconcat [prefix, ".", cs (show counter)]
+  in case (language, list )of
+    (_, ((Item item):(OrderedList items):rest)) -> (newPrefix, item):(
+                                                (extractNumberedIter language newPrefix 1 items)
+                                                ++ (extractNumberedIter language prefix (counter + 1) rest)
+                                                )
+    ("en", ((Item item):(IndentedList items):rest)) -> (newPrefix, item):(
+                                                extractLabeledExamples (extractExample newPrefix 1 items)
+                                                ++ (extractNumberedIter language prefix (counter + 1) rest)
+                                                )
+    ("fr", ((Item item):(BulletList items):rest)) -> (newPrefix, item):(
+                                                extractLabeledExamples (extractExample newPrefix 1 items)
+                                                ++ (extractNumberedIter language prefix (counter + 1) rest)
+                                                )
+    (_, ((Item item):rest))                     -> (newPrefix, item):(extractNumberedIter language prefix (counter + 1) rest)
+    (_, _:rest)                                 -> extractNumberedIter language prefix counter rest
+    (_, [])                                     -> []
+
+
+extractExample :: Text -> Int -> [ListItem] -> [LabeledDef]
+extractExample prefix counter list = 
+    let newPrefix = mconcat [prefix, ".ex.", cs (show counter)]
+    in case list of 
+      (Item item):(IndentedList items):rest -> 
+          let lastAnnotationM = lastListItemAnnotationMaybe items 
+          in case lastAnnotationM of 
+            Just it -> (newPrefix, item):(newPrefix ++ ".t", it):(extractExample prefix (counter + 1) rest)
+            _ -> (newPrefix, item):(extractExample prefix (counter + 1) rest)
+      (Item item):rest -> (newPrefix, item):(extractExample prefix (counter + 1) rest)
+      _ -> []
+
+
+-- For examples, we only care about annotations that 
+-- come from the appropriate example/usex templates. We don't want 
+-- to keep links and other annotations from within the example sentences,
+-- as they may not directly relate to the headword
+
+extractLabeledExamples :: [LabeledDef] -> [LabeledDef]
+extractLabeledExamples l = concat $ fmap extractLabeledExample l
+
+extractLabeledExample :: LabeledDef -> [LabeledDef] 
+extractLabeledExample (prefix,AnnotatedText annosMaps text) 
+  | isSuffixOf ".t"  prefix = [(prefix, AnnotatedText [] text)]
+  | otherwise  =
+      let flatMap = concat (M.toList <$> annosMaps)
+          exampleM  = lookup "exampleSentence" flatMap
+          translM   = lookup "exampleTranslation" flatMap
+      in case exampleM of 
+        Just example -> 
+          case translM of 
+            Just transl ->  [ (prefix, AnnotatedText [] example)
+                            , (prefix <> ".t", AnnotatedText [] transl)]
+            Nothing     ->  [ (prefix, AnnotatedText [] example) ]
+        Nothing -> [(prefix,AnnotatedText [] text) ]
+extractLabeledExample x = [x]
+
+lastListItemAnnotationMaybe:: [ListItem] -> Maybe AnnotatedText
+lastListItemAnnotationMaybe l = 
+  case lastMay l of 
+    Just (Item anno) -> Just $ anno
+    Just (BulletList itms) -> lastListItemAnnotationMaybe itms
+    Just (IndentedList itms) -> lastListItemAnnotationMaybe itms
+    Just (OrderedList itms) -> lastListItemAnnotationMaybe itms
+    _ -> Nothing
+  
 --In German and some other Wiktionaries that have followed its lead, lists have
 --specifically numbered word senses instead of automatic numbering. Instead of
 --starting with `#`, for example, a definition line starts with `:[1]`.
@@ -575,9 +637,21 @@ definitionToFacts language thisTerm defPair =
       -- get a sense either from the SenseID annotation, or failing that,
       -- from the label that comes with the definition
       defSense = mplus (findSenseID defText) (nonEmpty (Just (fst defPair)))
+      (isExample, isExampleTrl) =
+        case defSense of 
+          Just defString -> 
+            let isTransl = ".t" `isSuffixOf` defString
+                isEx = not isTransl && (".ex." `isInfixOf` defString)
+            in (isEx, isTransl)
+          Nothing -> (False,False)
       termSense = thisTerm {wtSense=defSense}
-      defPieces = splitDefinition (stripSpaces (getText defText))
-  in (map (makeDefinitionFact termSense language) defPieces)
+      strippedDefText = stripSpaces $ getText defText
+      defPieces = 
+        if isExample || isExampleTrl -- Don't want to split examples or translations
+          then [strippedDefText]
+          else splitDefinition strippedDefText
+      exampleLanguageM = if isExample then wtLanguage thisTerm else Nothing
+  in (map (makeDefinitionFact termSense (exampleLanguageM ?? language) ) defPieces)
      ⊕ (map (annotationToFact language termSense) (linkableAnnotations defText))
 
 --`makeDefinitionFact` makes a WiktionaryFact out of readable text in a

@@ -73,10 +73,15 @@ cloudberryFacts = [
     WiktionaryFact "link" (term ["plaquebière","fr","n","1","def.1"]) (term ["tourbière"]),
     WiktionaryFact "link" (term ["plaquebière","fr","n","1","def.1"]) (term ["nordique"]),
     WiktionaryFact "link" (term ["plaquebière","fr","n","1","def.1"]) (term ["Rubus chamaemorus"]),
+    WiktionaryFact "definition" (term ["plaquebière","fr","n","1","def.1.ex.1"]) (term ["Le blason représente un plant de plaquebière, ou mûre arctique, plante répandue dans la région.","fr"]),
+    WiktionaryFact "definition" (term ["plaquebière","fr","n","1","def.1.ex.2"]) (term ["Des sommets couverts de la toundra alpine, où les plaquebières ambrées brillent parmi les conifères nains.","fr"]),
     WiktionaryFact "definition" (term ["plaquebière","fr","n","1","def.2"]) (term ["Le fruit de cette plante, d’abord rouge puis jaune d’or à maturité, utilisé pour les confitures et dont on fait une liqueur","fr"]),
     WiktionaryFact "link" (term ["plaquebière","fr","n","1","def.2"]) (term ["fruit"]),
     WiktionaryFact "link" (term ["plaquebière","fr","n","1","def.2"]) (term ["confiture"]),
     WiktionaryFact "link" (term ["plaquebière","fr","n","1","def.2"]) (term ["liqueur","fr"]),
+    WiktionaryFact "definition" (term ["plaquebière","fr","n","1","def.2.ex.1"]) (term ["Un extrait de plaquebières.","fr"]),
+    WiktionaryFact "definition" (term ["plaquebière","fr","n","1","def.2.ex.2"]) (term ["On travaillait au jardin, on allait aux plaquebières, on cueillait des coques et du homard sur les grèves.","fr"]),
+    WiktionaryFact "definition" (term ["plaquebière","fr","n","1","def.2.ex.3"]) (term ["La plaquebière ressemble à une framboise orangée, tandis que l’aronie est une baie rouge ou noire.","fr"]),
     WiktionaryFact "variant" (term ["plaquebière","fr","n","1"]) (term ["plaque-bière"]),
     WiktionaryFact "hypernym" (term ["plaquebière","fr","n","1"]) (term ["rosacées"]),
     WiktionaryFact "hypernym" (term ["plaquebière","fr","n","1"]) (term ["baie"]),
@@ -111,9 +116,37 @@ compareLists name input output =
   -- confirm this by successfully comparing Nothing to Nothing.
   [(name <> ": item " <> (show i)) ~: (index input i) ~?= (index output i) | i <- [0..(length input)]]
 
+testExtract :: (Eq a, Show a) => (Text -> a) -> Text -> a -> Test
+testExtract func input output = (cs input) ~: (func input) ~?= output
+
+defnTests = [
+    testExtract (parseDefinitions "fr" frTemplates (termPos "en" "test" "Verb"))
+                    "# Être.\n\
+                    \#* ''I '''am''' happy.''\n\
+                    \#*: Je suis [[content]].\n\
+                    \#* ''To '''be''' or not to '''be'''.''\n\
+                    \#*: Être ou ne pas être."
+                    [WiktionaryFact "definition" (term ["test", "en", "Verb", "", "def.1"]) (simpleTerm "fr" "Être"),
+                    WiktionaryFact "definition" (term ["test", "en", "Verb", "", "def.1.ex.1"]) (simpleTerm "en" "I am happy."),
+                    WiktionaryFact "definition" (term ["test", "en", "Verb", "", "def.1.ex.1.t"]) (simpleTerm "fr" "Je suis content."),
+                    WiktionaryFact "definition" (term ["test", "en", "Verb", "", "def.1.ex.2"]) (simpleTerm "en" "To be or not to be."),
+                    WiktionaryFact "definition" (term ["test", "en", "Verb", "", "def.1.ex.2.t"]) (simpleTerm "fr" "Être ou ne pas être.")
+                    ],
+    testExtract (parseDefinitions "fr" frTemplates (termPos "ar" "test" "Noun"))
+                    "# [[désert|Désert]].\n\
+                    \#* {{Lang|ar|الصحراء الكبرى}}<br />''As-'''ṣaḥrā’''' al-’ákbará.''\n\
+                    \#*: Le grand désert, le Sahara."
+                    [WiktionaryFact "definition" (term ["test","ar", "Noun", "", "def.1"]) (simpleTerm "fr" "Désert"),
+                    WiktionaryFact "link" (term ["test","ar", "Noun", "", "def.1"]) (term ["désert"]),
+                    WiktionaryFact "definition" (term ["test","ar", "Noun", "", "def.1.ex.1"]) (simpleTerm "ar" "الصحراء الكبرى"),
+                    WiktionaryFact "definition" (term ["test","ar", "Noun", "", "def.1.ex.1.t"]) (simpleTerm "fr" "Le grand désert, le Sahara.")
+                    ]
+  ] 
+
+
 entryTests = compareLists "Example entry for 'plaquebière'" (frParseWiktionary "plaquebière" cloudberryEntry) cloudberryFacts
 
-tests = test entryTests
+tests = test (defnTests ++ entryTests)
 
 main :: IO ()
 main = void (runTestTT tests)

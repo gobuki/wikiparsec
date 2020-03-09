@@ -140,7 +140,8 @@ module WikiPrelude (
   replace, splitOn, stripSpaces, dropAround, dropWhileEnd, toTitle,
   breakOn, breakOnEnd, listTakeWhile, listDropWhile, hGetContentsLazy,
   get, getAll, getPrioritized, nonEmpty, hasKey,
-  println, ø, (∈), (⊕)
+  println, ø, (∈), (⊕),
+  (??)
   ) where
 
 -- Some of these exports are just re-exporting things that we import en masse:
@@ -259,3 +260,7 @@ nonEmpty val =
   case val of
     Just something -> if (something == ø) then Nothing else val
     Nothing -> Nothing
+
+
+-- use `??` as infix operator for defaulting a Maybe value
+(??) = flip fromMaybe 

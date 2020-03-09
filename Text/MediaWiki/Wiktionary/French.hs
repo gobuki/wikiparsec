@@ -845,6 +845,15 @@ handleLanguageCodeTemplate template = annotFromText (getLanguage "1" template)
 getLanguage :: Text -> Template -> Text
 getLanguage key map = fromLanguage $ lookupLanguage "fr" $ get key map
 
+-- Lang template used to display text in other languages, with optional French meaning
+
+handleLangTemplate :: Template -> AnnotatedText
+handleLangTemplate t = annotationBuilder $ do 
+  adapt "exampleSentence" ["texte", "2"] t
+  adapt "exampleTranslation" ["sens", "4"] t
+  visible ["texte", "2"] t
+  
+
 -- Links
 -- -----
 
@@ -873,6 +882,8 @@ handleTranslationTemplate t = annotationBuilder $ do
 frTemplates :: TemplateProc
 frTemplates "S"      = handleSectionTemplate
 frTemplates "langue" = handleLanguageCodeTemplate
+frTemplates "Lang" = handleLangTemplate
+frTemplates "lang" = handleLangTemplate
 frTemplates "term"   = handleMiscContextTemplate
 frTemplates "lien"   = handleLinkTemplate
 frTemplates "lien m" = handleLinkTemplate

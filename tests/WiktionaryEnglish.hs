@@ -273,11 +273,54 @@ compareLists name input output =
 
 defnTests = [
     -- Parse a definition list with word senses
+
     testExtract (parseDefinitions "en" enTemplates (termPos "en" "test" "Noun"))
                 "# {{senseid|en|first}} definition 1\n# {{senseid|en|second}} definition 2\n# definition 3"
                 [WiktionaryFact "definition" (term ["test", "en", "Noun", "", "first"]) (simpleTerm "en" "definition 1"),
                  WiktionaryFact "definition" (term ["test", "en", "Noun", "", "second"]) (simpleTerm "en" "definition 2"),
                  WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.3"]) (simpleTerm "en" "definition 3")],
+
+    -- testExtract (parseDefinitions "en" enTemplates (termPos "en" "test" "Noun"))
+    --             "# Definition of bonjour, a French word.\n\
+    --             \#: A first example?\n\
+    --             \#:: An English translation of the first example.\n\
+    --             \#: A second example\n\
+    --             \#:: Romanization for example (Can be ignored).\n\
+    --             \#:: An English translation of the second example."
+    --             [WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1"]) (simpleTerm "en" "Definition of bonjour, a French word"),
+    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.1"]) (simpleTerm "en" "A first example?"),
+    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.1.t"]) (simpleTerm "en" "An English translation of the first example"),
+    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.2"]) (simpleTerm "en" "A second example"),
+    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.2.t"]) (simpleTerm "en" "An English translation of the second example")],
+
+    testExtract (parseDefinitions "en" enTemplates (termPos "fr" "test" "Interjection"))
+                    "# Definition of bonjour, a French word.\n\
+                    \#: Bonjour, les enfants.\n\
+                    \#:: Hello, children.\n\
+                    \#: Bonjour, comment allez-vous?\n\
+                    \#:: Romanization for example (Can be ignored).\n\
+                    \#:: Hello, how do you do?\n\
+                    \#: {{ux|fr|Un autre exemple.|t=Another example.}}"
+                    [WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1"]) (simpleTerm "en" "Definition of bonjour, a French word"),
+                    WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1.ex.1"]) (simpleTerm "fr" "Bonjour, les enfants."),
+                    WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1.ex.1.t"]) (simpleTerm "en" "Hello, children."),
+                    WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1.ex.2"]) (simpleTerm "fr" "Bonjour, comment allez-vous?"),
+                    WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1.ex.2.t"]) (simpleTerm "en" "Hello, how do you do?"),
+                    WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1.ex.3"]) (simpleTerm "fr" "Un autre exemple."),
+                    WiktionaryFact "definition" (term ["test", "fr", "Interjection", "", "def.1.ex.3.t"]) (simpleTerm "en" "Another example.")
+                    ],
+
+    testExtract (parseDefinitions "en" enTemplates (termPos "ko" "test" "Determiner"))
+                    "# [[new]]\n\
+                    \#: '''새''' 집으로 벌써 이사했어요?\n\
+                    \#:: '''''Sae''' jip-euro beolsseo isahaess-eoyo?''\n\
+                    \#::: Did you already move into your '''new''' house?"
+                  [WiktionaryFact "definition" (term ["test","ko", "Determiner", "", "def.1"]) (simpleTerm "en" "new"),
+                  WiktionaryFact "link" (term ["test","ko", "Determiner", "", "def.1"]) (term ["new"]),
+                  WiktionaryFact "definition" (term ["test","ko", "Determiner", "", "def.1.ex.1"]) (simpleTerm "ko" "새 집으로 벌써 이사했어요?"),
+                  WiktionaryFact "definition" (term ["test","ko", "Determiner", "", "def.1.ex.1.t"]) (simpleTerm "en" "Did you already move into your new house?")
+                  ],
+
 
     -- Parse a "related terms" list, where the first entry has an additional link we ignore
     testExtract (enParseWiktionary "example")

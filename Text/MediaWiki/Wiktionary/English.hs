@@ -653,6 +653,25 @@ handleLanguageFormTemplate2 language formKeys t =
     adapt "page" arg2 t
     invisible
 
+
+-- 
+-- Example Sentences
+--
+-- TODO : language-specific example templates
+-- -----
+
+handleUXTemplate :: Template -> AnnotatedText
+handleUXTemplate t = annotationBuilder $ do 
+  adapt "exampleSentence" ["2"] t
+  adapt "exampleTranslation" ["translation", "t", "3"] t
+  invisible
+
+handleKoXTemplate :: Template -> AnnotatedText
+handleKoXTemplate t = annotationBuilder $ do
+  adapt "exampleSentence" ["1"] t
+  adapt "exampleTranslation" ["2"] t
+  invisible
+
 -- Possible templates still to handle:
 
 -- - [[Category:Form-of_templates]]
@@ -787,6 +806,10 @@ enTemplates "pt-verb form of" = handleLanguageFormTemplate "pt" ["3","4","5","6"
 
 enTemplates "fi-form of"       = handleLanguageFormTemplate "fi" ["case","pr","pl","mood","tense","suffix"]
 enTemplates "ru-participle of" = handleLanguageFormTemplate "ru" ["2","3","4","5"]
+
+enTemplates "ux"  = handleUXTemplate 
+enTemplates "ko-x" = handleKoXTemplate 
+enTemplates "ko-usex" = handleKoXTemplate 
 
 enTemplates x
   | isPrefixOf "sv-noun-form" x = handleSwedishFormTemplate
