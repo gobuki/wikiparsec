@@ -279,20 +279,7 @@ defnTests = [
                 [WiktionaryFact "definition" (term ["test", "en", "Noun", "", "first"]) (simpleTerm "en" "definition 1"),
                  WiktionaryFact "definition" (term ["test", "en", "Noun", "", "second"]) (simpleTerm "en" "definition 2"),
                  WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.3"]) (simpleTerm "en" "definition 3")],
-
-    -- testExtract (parseDefinitions "en" enTemplates (termPos "en" "test" "Noun"))
-    --             "# Definition of bonjour, a French word.\n\
-    --             \#: A first example?\n\
-    --             \#:: An English translation of the first example.\n\
-    --             \#: A second example\n\
-    --             \#:: Romanization for example (Can be ignored).\n\
-    --             \#:: An English translation of the second example."
-    --             [WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1"]) (simpleTerm "en" "Definition of bonjour, a French word"),
-    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.1"]) (simpleTerm "en" "A first example?"),
-    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.1.t"]) (simpleTerm "en" "An English translation of the first example"),
-    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.2"]) (simpleTerm "en" "A second example"),
-    --              WiktionaryFact "definition" (term ["test", "en", "Noun", "", "def.1.ex.2.t"]) (simpleTerm "en" "An English translation of the second example")],
-
+                 
     testExtract (parseDefinitions "en" enTemplates (termPos "fr" "test" "Interjection"))
                     "# Definition of bonjour, a French word.\n\
                     \#: Bonjour, les enfants.\n\
