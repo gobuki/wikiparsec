@@ -141,7 +141,8 @@ module WikiPrelude (
   breakOn, breakOnEnd, listTakeWhile, listDropWhile, hGetContentsLazy,
   get, getAll, getPrioritized, nonEmpty, hasKey,
   println, ø, (∈), (⊕),
-  (??)
+  (??),
+  (.||),(.&&),
   ) where
 
 -- Some of these exports are just re-exporting things that we import en masse:
@@ -264,3 +265,11 @@ nonEmpty val =
 
 -- use `??` as infix operator for defaulting a Maybe value
 (??) = flip fromMaybe 
+
+-- use `.||` and `.&&` to combine functions that produce a Bool
+(.||) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
+(.||) x y a = x a || y a
+
+-- use `|||` and `&&&` to combine functions that produce a Bool
+(.&&) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
+(.&&) x y a = x a && y a

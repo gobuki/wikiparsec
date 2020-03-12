@@ -261,6 +261,43 @@ solderFacts = [
     WiktionaryFact "related" (term ["solder","fr","v","1"]) (term ["solderie"]),
     WiktionaryFact "related" (term ["solder","fr","v","1"]) (term ["soldeur"])]
 
+
+
+wanjeonEntry :: Text
+wanjeonEntry = unlines ["==Korean==",
+  "",
+  "===Etymology===",
+  "{{ko-etym-Sino|完全}}",
+  "",
+  "===Pronunciation===",
+  "{{ko-IPA}}",
+  "",
+  "===Adverb===",
+  "{{ko-adv|hanja=完全}}",
+  "",
+  "# [[absolutely]], [[completely]], [[totally]]",
+  "",
+  "===Noun===",
+  "{{ko-noun|hanja=完全}}",
+  "",
+  "# [[perfection]]",
+  "",
+  "====Derived terms====",
+  "* {{ko-l|완전하다}}"]
+  
+wanjeonFacts :: [WiktionaryFact]
+wanjeonFacts = [
+  WiktionaryFact "derived/etym" (WiktionaryTerm {wtText="完全", wtSense=Just "sino-korean", wtLanguage=Nothing,wtPos=Nothing,wtEtym=Nothing}) (term ["완전","ko","","1"]) ,
+  WiktionaryFact "definition" (term ["완전","ko","r","1","def.1"]) (term ["absolutely","en"]),
+  WiktionaryFact "definition" (term ["완전","ko","r","1","def.1"]) (term ["completely","en"]),
+  WiktionaryFact "definition" (term ["완전","ko","r","1","def.1"]) (term ["totally","en"]),
+  WiktionaryFact "link" (term ["완전","ko","r","1","def.1"]) (term ["absolutely"]),
+  WiktionaryFact "link" (term ["완전","ko","r","1","def.1"]) (term ["completely"]),
+  WiktionaryFact "link" (term ["완전","ko","r","1","def.1"]) (term ["totally"]),
+  WiktionaryFact "definition" (term ["완전","ko","n","1","def.1"]) (term ["perfection","en"]),
+  WiktionaryFact "link" (term ["완전","ko","n","1","def.1"]) (term ["perfection"])
+  ]
+
 testExtract :: (Eq a, Show a) => (Text -> a) -> Text -> a -> Test
 testExtract func input output = (cs input) ~: (func input) ~?= output
 
@@ -327,9 +364,10 @@ defnTests = [
                  WiktionaryFact "derived" (term ["holder", "en"]) (term ["placeholder", "en", "", "1"])]
     ]
 
-entryTests = compareLists "Example entry for 'solder'" (enParseWiktionary always "solder" solderEntry) solderFacts
+solderTests = compareLists "Example entry for 'solder'" (enParseWiktionary always "solder" solderEntry) solderFacts
+wanjeonTests = compareLists "Exapmle entry for '완전'" (enParseWiktionary always "완전" wanjeonEntry) wanjeonFacts
 
-tests = test (defnTests ++ entryTests)
+tests = test (defnTests ++ solderTests ++ wanjeonTests)
 
 main :: IO ()
 main = void (runTestTT tests)

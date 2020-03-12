@@ -155,9 +155,16 @@ pTransBottom = specificTemplate enTemplates "trans-bottom" >> return ()
 enParseEtymology :: WiktionaryTerm -> Text -> [WiktionaryFact]
 enParseEtymology thisTerm text =
   let etymParsed = parseOrDefault mempty (sectionAnnotated enTemplates) text
-      annots = languageTaggedAnnotations etymParsed
+      annots = etymOrLangTaggedAnnotations etymParsed
       facts = map (annotationToFact "en" thisTerm) annots
   in map (assignRel "related/etym") facts
+
+etymTaggedAnnotation :: Annotation -> Bool
+etymTaggedAnnotation annot = "/etym" `isSuffixOf` (get "rel" annot) 
+
+etymOrLangTaggedAnnotations:: AnnotatedText -> [Annotation]
+etymOrLangTaggedAnnotations atext = filter (languageTaggedAnnotation .|| etymTaggedAnnotation) (getAnnotations atext)
+
 
 -- Finding headings
 -- ================
@@ -399,14 +406,14 @@ handleEtylTemplate t = annotationBuilder $ do
 -- The hanja reading of the ko-etym-Sino template is handled by
 -- extracting only the hanja elements of the alternating hanja/meaning fields
 -- 
--- Note that the language is left as "-" because the actual etymological origin
+-- Note that the language field is undefined because the actual etymological origin
 -- may not necessarily be Chinese, or it may be an unspecified language/dialect/stage
--- of Chinese. For the time being we use the wtSense field of WiktionaryTerm
+-- of Chinese. 
+-- For the time being we use the wtSense field of WiktionaryTerm
 -- to hold the label "sino-korean"
 handleKoEtymSinoTemplate :: Template -> AnnotatedText
 handleKoEtymSinoTemplate t = annotationBuilder $ do
   put "rel" "*derived/etym"
-  put "language" "-"
   put "sense" "sino-korean"
   let hanja = (concat . takeEvenIndices) $ snd <$> (drop 1 t)
   put "page" hanja
@@ -424,7 +431,7 @@ handleKoEtymSinoTemplate t = annotationBuilder $ do
 -- Wiktionary template module might be more complex, but this should
 -- work for most cases.
 --
--- As with ko-etym-Sino, we leave the language field as "-" and 
+-- As with ko-etym-Sino, we leave the language field undefined and 
 -- store the label "sino-korean" in the wtSense field of WiktionaryTerm
 
 handleKoLTemplate ::  Template -> AnnotatedText
@@ -433,7 +440,6 @@ handleKoLTemplate t =
   case hanjaM of
     Just hanja -> annotationBuilder $ do 
                       put "rel" "*derived/etym"
-                      put "language" "-"
                       put "sense" "sino-korean"
                       put "page" hanja
                       invisible
@@ -703,7 +709,7 @@ enTemplates "suffix"    = handleSuffixTemplate
 enTemplates "compound"  = handleCompoundTemplate
 enTemplates "blend"     = handleCompoundTemplate
 enTemplates "etyl"      = handleEtylTemplate
-enTemplates "ko-etym-Sino" = handleKoEtymSinoTemplate
+enTemplates "ko-etym-sino" = handleKoEtymSinoTemplate
 enTemplates "label"     = handleLabelTemplate
 enTemplates "lbl"       = handleLabelTemplate
 enTemplates "lb"        = handleLabelTemplate
@@ -809,6 +815,7 @@ enTemplates x
   | isPrefixOf "sv-noun-form" x = handleSwedishFormTemplate
   | isPrefixOf "sv-adj-form"  x = handleSwedishFormTemplate
   | isPrefixOf "sv-verb-form" x = handleSwedishFormTemplate
+  | any (∈ ['A'..'Z']) x = enTemplates (toLower x)
   | otherwise                   = skipTemplate
 -- 
 
