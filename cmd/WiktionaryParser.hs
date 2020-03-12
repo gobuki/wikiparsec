@@ -8,10 +8,11 @@ import Text.MediaWiki.Wiktionary.Base (WiktionaryFact)
 import Text.MediaWiki.Wiktionary.English (enParseWiktionary)
 import Text.MediaWiki.Wiktionary.French (frParseWiktionary)
 import Text.MediaWiki.Wiktionary.German (deParseWiktionary)
+import Text.MediaWiki.Wiktionary.Base (LanguageTitlePolicy)
 import Data.Aeson (ToJSON)
 import Data.Aeson.Encode.Pretty (
     encodePretty', keyOrder, Config(..), Indent(..), NumberFormat(..))
-
+import Data.Unicode -- TEMP
 -- Language handling
 -- =================
 
@@ -20,10 +21,14 @@ import Data.Aeson.Encode.Pretty (
 -- will be in, so we can delegate to the appropriate handler.
 
 languageHandler :: Language -> Text -> Text -> [WiktionaryFact]
-languageHandler "en"  = enParseWiktionary
-languageHandler "fr"  = frParseWiktionary
-languageHandler "de"  = deParseWiktionary
-languageHandler other = error ("unknown language: " <> (cs (fromLanguage other)))
+languageHandler "en" title  = enParseWiktionary always title 
+languageHandler "fr" title  = frParseWiktionary always title
+languageHandler "de" title  = deParseWiktionary always title 
+languageHandler other _ = error ("unknown language: " <> (cs (fromLanguage other)))
+
+always :: LanguageTitlePolicy
+always = const . const True
+
 
 -- Page info
 -- =========
@@ -69,8 +74,8 @@ encodeMultiline = encodePretty' customConfig
 handlePage :: Language -> WikiPage -> IO ()
 handlePage language page = do
   when (pageNamespace page == "0" && pageRedirect page == Nothing) $ do
-    let pageInfo = PageInfo { title=(pageTitle page), language=language }
-    (println . customEncode) pageInfo
+    -- let pageInfo = PageInfo { title=(pageTitle page), language=language }
+    -- (println . customEncode) pageInfo
     (mapM_ (println . customEncode)
            (languageHandler language (pageTitle page) (pageText page)))
 

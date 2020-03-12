@@ -23,10 +23,10 @@ import Data.LanguageNames
 -- This function can be passed as an argument to `handleFile` in
 -- Text.MediaWiki.Wiktionary.Base.
 
-frParseWiktionary :: Text -> Text -> [WiktionaryFact]
-frParseWiktionary title text =
+frParseWiktionary :: LanguageTitlePolicy -> Text -> Text -> [WiktionaryFact]
+frParseWiktionary langTitlePolicy title text =
   let sections = parsePageIntoSections text in
-    concat (map (frParseSection title) sections)
+    concat (map (frParseSection langTitlePolicy title) sections)
 
 
 -- Finding headings
@@ -101,14 +101,17 @@ getAnnotationInList idx key atexts =
 -- a WiktionaryTerm structure for the term we're defining, and passes it on to
 -- a function that will extract WiktionaryFacts.
 
-frParseSection :: Text -> WikiSection -> [WiktionaryFact]
-frParseSection title (WikiSection {headings=headings, content=content}) =
+frParseSection :: LanguageTitlePolicy -> Text -> WikiSection -> [WiktionaryFact]
+frParseSection langTitlePolicy title (WikiSection {headings=headings, content=content}) =
   let evalHeadings = map evalHeading headings in
     case getTerm title evalHeadings of
       Nothing   -> []
       Just term ->
-        let sectionType = getSectionType evalHeadings in
-          chooseSectionParser sectionType term content
+        case wtLanguage term of 
+          Just l | langTitlePolicy l title -> 
+              let sectionType = getSectionType evalHeadings in
+                  chooseSectionParser sectionType term content
+          _ -> []
 
 chooseSectionParser :: Text -> WiktionaryTerm -> Text -> [WiktionaryFact]
 chooseSectionParser "POS"             = frParseDefinitions

@@ -310,26 +310,30 @@ defnTests = [
 
 
     -- Parse a "related terms" list, where the first entry has an additional link we ignore
-    testExtract (enParseWiktionary "example")
+    testExtract (enParseWiktionary always "example")
                 "==English==\n===Related terms===\n* [[entry]] with an [[addendum]]\n* [[other]]"
                 [WiktionaryFact "related" (term ["example", "en", "", "1"]) (term ["entry"]),
                  WiktionaryFact "related" (term ["example", "en", "", "1"]) (term ["other"])],
 
     -- Parse a "compound" template two different ways
-    testExtract (enParseWiktionary "placeholder")
+    testExtract (enParseWiktionary always "placeholder")
                 "==English==\n===Etymology===\n{{compound|en|place|holder}}"
                 [WiktionaryFact "derived" (term ["place", "en"]) (term ["placeholder", "en", "", "1"]),
                  WiktionaryFact "derived" (term ["holder", "en"]) (term ["placeholder", "en", "", "1"])],
 
-    testExtract (enParseWiktionary "placeholder")
+    testExtract (enParseWiktionary always "placeholder")
                 "==English==\n===Etymology===\n{{compound|place|holder|lang=en}}"
                 [WiktionaryFact "derived" (term ["place", "en"]) (term ["placeholder", "en", "", "1"]),
                  WiktionaryFact "derived" (term ["holder", "en"]) (term ["placeholder", "en", "", "1"])]
     ]
 
-entryTests = compareLists "Example entry for 'solder'" (enParseWiktionary "solder" solderEntry) solderFacts
+entryTests = compareLists "Example entry for 'solder'" (enParseWiktionary always "solder" solderEntry) solderFacts
 
 tests = test (defnTests ++ entryTests)
 
 main :: IO ()
 main = void (runTestTT tests)
+
+
+
+always = const . const True

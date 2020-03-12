@@ -1126,3 +1126,12 @@ handleFileJSON languageParser title filename = do
   let fromHTML = extractWikiTextFromHTML contents
   mapM_ (println . cs . encode) (languageParser title fromHTML)
 --
+
+
+-- A LanguageTitlePolicy allows our parser to skip parsing of certain
+-- Wiktionary entries for a certain language into WiktionaryFacts. For example, maybe for 
+-- a given application we only care about Chinese entries where the title
+-- contains only traditional characters.
+
+type LanguageTitlePolicy = Language -> Text -> Bool
+

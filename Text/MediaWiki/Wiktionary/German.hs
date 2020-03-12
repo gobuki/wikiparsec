@@ -23,10 +23,10 @@ import Data.LanguageNames
 -- This function can be passed as an argument to `handleFile` in
 -- Text.MediaWiki.Wiktionary.Base.
 
-deParseWiktionary :: Text -> Text -> [WiktionaryFact]
-deParseWiktionary title text =
+deParseWiktionary :: LanguageTitlePolicy -> Text -> Text -> [WiktionaryFact]
+deParseWiktionary langTitlePolicy title text =
   let sections = parsePageIntoSections text in
-    concat (map (deParseSection title) sections)
+    concat (map (deParseSection langTitlePolicy title) sections)
 
 -- 
 -- Finding headings
@@ -66,17 +66,19 @@ partOfSpeechMap _            = "_"
 -- a WiktionaryTerm structure for the term we're defining, and passes it on to
 -- a function that will extract WiktionaryFacts.
 
-deParseSection :: Text -> WikiSection -> [WiktionaryFact]
-deParseSection title (WikiSection {headings=headings, content=content}) =
+deParseSection :: LanguageTitlePolicy -> Text -> WikiSection -> [WiktionaryFact]
+deParseSection titleLangPolicy title (WikiSection {headings=headings, content=content}) =
   case headings of
-    (_:_:pos:trans:[]) ->
-      let term = getHeadingTerm title (evalHeading pos) in
-        if trans == "Übersetzungen"
-          then (deParseTranslations term content)
-          else []
-    (_:_:pos:[]) ->
-      let term = getHeadingTerm title (evalHeading pos) in
-        deParseCombinedSection term content
+    (_:_:pos:rest) ->
+      let term = getHeadingTerm title (evalHeading pos) 
+          langM = wtLanguage term in
+      case langM of 
+        Just lang | titleLangPolicy lang title ->
+            case rest of 
+              "Übersetzungen":[] -> (deParseTranslations term content)
+              [] -> deParseCombinedSection term content
+              _ -> []
+        _ -> []
     _ -> []
 
 getHeadingTerm :: Text -> AnnotatedText -> WiktionaryTerm

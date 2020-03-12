@@ -109,6 +109,50 @@ cloudberryFacts = [
     WiktionaryFact "translation" (term ["plaquebière","fr","n","1","La plante et le fruit (sauf mention contraire)"]) (term ["Rubus chamaemorus","mul"])
     ]
 
+hanguoEntry :: Text
+hanguoEntry = unlines [
+  "== {{langue|zh}} ==",
+  "=== {{S|étymologie}} ===",
+  "{{tableau han|zh}}",
+  ": Du {{étyl|ko|zh|한국|Hanguk}}. Composé de {{zh-lien|韓|hán|韩}} (« {{w|Samhan}} ») et de {{zh-lien|國|guó|国}} (« [[pays]] »).",
+  "",
+  "=== {{S|nom propre|zh}} ===",
+  "{{zh-formes|韩国|韓國}}",
+  "{{zh-mot-t|韓國|Hánguó}}",
+  "# {{géographie|zh}} [[Corée du Sud]] (État d’[[Asie]]).",
+  "",
+  "==== {{S|synonymes}} ====",
+  "* {{zh-lien|朝鮮|cháoxiǎn|朝鲜}} — [[Corée]] (unie), [[Corée du Nord]]",
+  "",
+  "=== {{S|prononciation}} ===",
+  "{{cmn-pron|hánguó}}",
+  "* '''cantonais''' {{pron||yue}}",
+  "** {{Jyutping}} :",
+  "** {{Penkyamp}} :",
+  "** {{Yale-zh}} : hon4gwok3",
+  "",
+  "[[Catégorie:Pays en chinois]]",
+  "",
+  "== {{langue|ko}} ==",
+  "=== {{S|nom propre|ko}} ===",
+  "{{ko-nom|한국|hanja=韓國|propre=1}}",
+  "'''{{lang|ko-Hani|韓國}}'''",
+  "# {{terme|En Corée du Sud}} {{variante hanja de|한국|sens=[[Corée du Sud]]}}.",
+  "",
+  "== {{langue|vi}} ==",
+  "=== {{S|nom propre|vi}} ===",
+  "'''{{lang|vi-Hani|韓國}}''' ({{lien|Hàn Quốc|vi}})",
+  "# [[Corée du Sud]]."]
+
+hanguoFacts :: [WiktionaryFact]
+hanguoFacts = [
+  WiktionaryFact "definition" (term ["韓國","zh","n","1","def.1"]) (term ["Corée du Sud (État d’Asie)","fr"]),
+  WiktionaryFact "context"  (term ["韓國","zh","n","1","def.1"])  (term ["géographie","fr"]),
+  WiktionaryFact "link"  (term ["韓國","zh","n","1","def.1"]) (term ["Corée du Sud"]),
+  WiktionaryFact "link"  (term ["韓國","zh","n","1","def.1"]) (term ["Asie"]),
+  WiktionaryFact "synonym"  (term ["韓國","zh","n","1"]) (term ["Corée"])
+  ]
+
 compareLists :: (Eq a, Show a) => String -> [a] -> [a] -> [Test]
 compareLists name input output =
   -- This deliberately runs off the end of the list. If the lists are the
@@ -144,9 +188,12 @@ defnTests = [
   ] 
 
 
-entryTests = compareLists "Example entry for 'plaquebière'" (frParseWiktionary "plaquebière" cloudberryEntry) cloudberryFacts
+entryTests = compareLists "Example entry for 'plaquebière'" (frParseWiktionary always "plaquebière" cloudberryEntry) cloudberryFacts
+entryTestsShui = compareLists "Example entry for '韓國'" (frParseWiktionary (\l c -> l == "zh")  "韓國" hanguoEntry) hanguoFacts
 
-tests = test (defnTests ++ entryTests)
+tests = test (defnTests ++ entryTests ++ entryTestsShui)
 
 main :: IO ()
 main = void (runTestTT tests)
+
+always = const . const True

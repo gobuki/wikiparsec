@@ -9,7 +9,7 @@
 -- Export only the top-level, namespaced functions.
 
 module Text.MediaWiki.Wiktionary.English
-  (enParseWiktionary, enTemplates, enParseRelation, enParseEtymology, testParse) where
+  (enParseWiktionary, enTemplates, enParseRelation, enParseEtymology) where
 import WikiPrelude
 import Text.MediaWiki.Templates
 import Text.MediaWiki.AnnotatedText
@@ -22,15 +22,6 @@ import Data.Attoparsec.Text
 import Data.LanguageNames
 import Data.Unicode (isChinese)
 
---TEMPORARY
-import qualified Data.Text.IO as IO 
-testParse :: Text -> IO ()
-testParse fileName = do
-  text <- IO.readFile (unpack fileName)
-  let title = fst $ splitFirst "." fileName
-  let facts = enParseWiktionary title text
-  print facts
-
 
 -- 
 -- Parsing entire pages
@@ -39,10 +30,10 @@ testParse fileName = do
 -- This function can be passed as an argument to `handleFileJSON` in
 -- Text.MediaWiki.Wiktionary.Base.
 
-enParseWiktionary :: Text -> Text -> [WiktionaryFact]
-enParseWiktionary title text =
+enParseWiktionary :: LanguageTitlePolicy -> Text -> Text -> [WiktionaryFact]
+enParseWiktionary langTitlePolicy title text =
   let sections = parsePageIntoSections text in
-    concat (map (enParseSection title) sections)
+    concat (map (enParseSection langTitlePolicy title) sections)
 
 -- 
 -- Choosing an appropriate section parser
@@ -53,8 +44,9 @@ enParseWiktionary title text =
 -- we're defining, and passes it on to a function that will extract
 -- WiktionaryFacts.
 
-enParseSection :: Text -> WikiSection -> [WiktionaryFact]
-enParseSection title (WikiSection {headings=headings, content=content}) =
+
+enParseSection :: LanguageTitlePolicy -> Text -> WikiSection -> [WiktionaryFact]
+enParseSection langTitlePolicy title (WikiSection {headings=headings, content=content}) =
   -- The first two headings are the meaningless level-1 heading and the
   -- language heading. If those aren't there, bail out.
   case uncons (drop 1 headings) of
@@ -75,7 +67,9 @@ enParseSection title (WikiSection {headings=headings, content=content}) =
                           wtPos=partOfSpeechMap <$> maybePos,
                           wtSense=Nothing
                           }
-      in chooseSectionParser sectionType thisTerm content
+      in if langTitlePolicy language title
+            then chooseSectionParser sectionType thisTerm content
+            else []
 
 -- `chooseSectionParser` selects a particular function for making WiktionaryFacts,
 -- based on the type of section we're parsing.
