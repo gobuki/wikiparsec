@@ -640,6 +640,7 @@ hadaFacts = [
       WiktionaryFact "definition" (term ["하다","okm","a","1","def.1"]) (term ["big","en"])
       ]
 
+
 testExtract :: (Eq a, Show a) => (Text -> a) -> Text -> a -> Test
 testExtract func input output = (cs input) ~: (func input) ~?= output
 

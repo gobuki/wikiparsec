@@ -142,7 +142,7 @@ instance ToJSON WiktionaryFact where
   toJSON (WiktionaryFact rel from to) = object ["rel" .= rel, "from" .= from, "to" .= to]
 
 instance Show WiktionaryFact where 
-  show (WiktionaryFact rel t1 t2) = "WiktionaryFact \"" ++ (show (unpack rel)) ++ "\" (" ++ show t1 ++ ") (" ++ show t2 ++ ")"
+  show (WiktionaryFact rel t1 t2) = "WiktionaryFact " ++ (show (unpack rel)) ++ " (" ++ show t1 ++ ") (" ++ show t2 ++ ")"
 
 
 --`makeFact` or one of its derived functions should be used to create
