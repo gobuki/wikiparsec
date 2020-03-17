@@ -273,3 +273,4 @@ nonEmpty val =
 -- use `|||` and `&&&` to combine functions that produce a Bool
 (.&&) :: (a -> Bool) -> (a -> Bool) -> a -> Bool
 (.&&) x y a = x a && y a
+

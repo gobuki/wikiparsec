@@ -756,6 +756,8 @@ enTemplates "initialism of"       = useArg "1"
 enTemplates "acronym of"          = useArg "1"
 enTemplates "synonym of"          = useArg "1"
 enTemplates "w"                   = useArg "1"
+enTemplates "lang"                = useArg "2"
+
 
 enTemplates "en-simple past of"                    = handleSpecificFormsTemplate "en" ["past"]
 enTemplates "en-past of"                           = handleSpecificFormsTemplate "en" ["past", "past+ptcp"]

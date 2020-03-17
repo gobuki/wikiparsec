@@ -6,7 +6,7 @@
 
 {-# LANGUAGE NoImplicitPrelude, OverloadedStrings, UnicodeSyntax, FlexibleContexts #-}
 module Text.MediaWiki.Wiktionary.Base where
-import WikiPrelude
+import WikiPrelude hiding (dropWhileEnd)
 import Text.MediaWiki.WikiText
 import Text.MediaWiki.ParseTools
 import Text.SplitUtils
@@ -18,6 +18,7 @@ import Data.Aeson (ToJSON, toJSON, (.=), encode, object)
 import Data.LanguageNames
 import Data.LanguageType
 import Data.Maybe (isNothing)
+import qualified Data.List as L
 import Text.Language.Normalize (normalizeText)
 import Text.MediaWiki.HTML (extractWikiTextFromHTML)
 import Text.Show.Unicode
@@ -78,7 +79,9 @@ moveSecondMaybe (first, Nothing)     = Nothing
 --UTF-8 everywhere.
 
 instance Show WiktionaryTerm where
-  show = cs . encode . toJSON
+  show t = "term " ++ (ushow (dropBlanks (fromTerm t)))
+        where dropBlanks = L.dropWhileEnd (=="")
+
 
 --`term` is a constructor for WiktionaryTerms. Because many of the fields of a
 --WiktionaryTerm are optional, it takes a single argument that is a list of Texts.
@@ -105,6 +108,15 @@ term items =
       wtSense = nonEmpty (index items 4)
       }
 
+fromTerm :: WiktionaryTerm -> [Text]
+fromTerm t@WiktionaryTerm{
+      wtText = text,
+      wtLanguage = langM,
+      wtPos = posM,
+      wtEtym = etymM,
+      wtSense = senseM
+      } = [text, fromMaybe "" (fromLanguage <$> langM), fromMaybe "" posM, fromMaybe "" etymM, fromMaybe "" senseM] 
+
 --Two more constructors for straightforward cases. `simpleTerm` takes in the language code and
 --the text, and produces a WiktionaryTerm.
 
@@ -124,10 +136,14 @@ termPos language text pos = term [text, fromLanguage language, pos]
 --from a page. Much like a ConceptNet edge, it's defined by a relation `rel` that
 --points `from` one term `to` another term.
 
-data WiktionaryFact = WiktionaryFact Text WiktionaryTerm WiktionaryTerm deriving (Show, Eq)
+data WiktionaryFact = WiktionaryFact Text WiktionaryTerm WiktionaryTerm deriving (Eq)
 
 instance ToJSON WiktionaryFact where
   toJSON (WiktionaryFact rel from to) = object ["rel" .= rel, "from" .= from, "to" .= to]
+
+instance Show WiktionaryFact where 
+  show (WiktionaryFact rel t1 t2) = "WiktionaryFact \"" ++ (show (unpack rel)) ++ "\" (" ++ show t1 ++ ") (" ++ show t2 ++ ")"
+
 
 --`makeFact` or one of its derived functions should be used to create
 --WiktionaryFacts.
@@ -651,8 +667,8 @@ definitionToFacts language thisTerm defPair =
           then [strippedDefText]
           else splitDefinition strippedDefText
       exampleLanguageM = if isExample then wtLanguage thisTerm else Nothing
-  in (map (makeDefinitionFact termSense (exampleLanguageM ?? language) ) defPieces)
-     ⊕ (map (annotationToFact language termSense) (linkableAnnotations defText))
+  in (map (makeDefinitionFact termSense (exampleLanguageM ?? language)) defPieces)
+     ⊕ (map (annotationToFact (exampleLanguageM ?? language) termSense) (linkableAnnotations defText))
 
 --`makeDefinitionFact` makes a WiktionaryFact out of readable text in a
 --definition.  It takes in the term being defined and the language it's being
