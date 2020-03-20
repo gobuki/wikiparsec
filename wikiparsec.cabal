@@ -24,7 +24,7 @@ Library
                        Text.MediaWiki.Wiktionary.German,
                        WikiPrelude,
                        Data.LanguageType,
-                       Text.MediaWiki.Sections 
+                       Text.MediaWiki.Sections, Text.MediaWiki.XML 
   other-modules:       Data.LanguageNamesData, Text.MediaWiki.ParseTools,
                        Text.SplitUtils, Text.MediaWiki.AnnotatedText,
                        Text.MediaWiki.Templates,

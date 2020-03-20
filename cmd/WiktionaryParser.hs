@@ -12,7 +12,7 @@ import Text.MediaWiki.Wiktionary.Base (LanguageTitlePolicy)
 import Data.Aeson (ToJSON)
 import Data.Aeson.Encode.Pretty (
     encodePretty', keyOrder, Config(..), Indent(..), NumberFormat(..))
-import Data.Unicode -- TEMP
+    
 -- Language handling
 -- =================
 
