@@ -21,6 +21,12 @@ Wikiparsec is used to provide dictionary definitions to
 [ConceptNet](http://conceptnet.io).
 
 
+TODO 
+------------------------------
+
+- Example sentences in German
+- Standardize Parts of Speech for French, German. Consider common enum type for all 3 languages
+
 Compiling and running the code
 ------------------------------
 

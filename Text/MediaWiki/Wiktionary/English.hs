@@ -64,7 +64,7 @@ enParseSection langTitlePolicy title (WikiSection {headings=headings, content=co
                           wtText=title,
                           wtLanguage=Just language,
                           wtEtym=Just etymNumber,
-                          wtPos=partOfSpeechMap <$> maybePos,
+                          wtPos= maybePos,
                           wtSense=Nothing
                           }
       in if langTitlePolicy language title
@@ -187,14 +187,14 @@ partsOfSpeech = setFromList [
   "Symbol"
   ]
 
-partOfSpeechMap :: Text -> Text
-partOfSpeechMap "Adjective"   = "a"
-partOfSpeechMap "Adverb"      = "r"
-partOfSpeechMap "Noun"        = "n"
-partOfSpeechMap "Pronoun"     = "n"
-partOfSpeechMap "Proper noun" = "n"
-partOfSpeechMap "Verb"        = "v"
-partOfSpeechMap _             = "_"
+-- partOfSpeechMap :: Text -> Text
+-- partOfSpeechMap "Adjective"   = "a"
+-- partOfSpeechMap "Adverb"      = "r"
+-- partOfSpeechMap "Noun"        = "n"
+-- partOfSpeechMap "Pronoun"     = "n"
+-- partOfSpeechMap "Proper noun" = "n"
+-- partOfSpeechMap "Verb"        = "v"
+-- partOfSpeechMap _             = "_"
 
 findPartOfSpeech :: [Text] -> Maybe Text
 findPartOfSpeech = findHeading partsOfSpeech
