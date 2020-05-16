@@ -708,9 +708,9 @@ defnTests = [
     ]
 
 solderTests = compareLists "Example entry for 'solder'" (enParseWiktionary always "solder" solderEntry) solderFacts
-wanjeonTests = compareLists "Exapmle entry for '완전'" (enParseWiktionary always "완전" wanjeonEntry) wanjeonFacts
-hadaTests = compareLists "Exapmle entry for 'hata'" (enParseWiktionary always "하다" hadaEntry) hadaFacts
-tests = test (defnTests ++ solderTests ++ wanjeonTests ++ hadaTests)
+wanjeonTests = compareLists "Example entry for '완전'" (enParseWiktionary always "완전" wanjeonEntry) wanjeonFacts
+hadaTests = compareLists "Example entry for 'hata'" (enParseWiktionary always "하다" hadaEntry) hadaFacts
+tests = test (defnTests ++ solderTests ++ wanjeonTests ++ hadaTests ++ tempText)
 
 main :: IO ()
 main = void (runTestTT tests)
@@ -719,3 +719,35 @@ main = void (runTestTT tests)
 
 always = const . const True
 
+
+tempText = compareLists "TEMPORARY" (enParseWiktionary always "일월" temp) [] 
+
+temp :: Text
+temp = unlines ["==Korean==",
+        "",
+        "===Pronunciation===",
+        "{{ko-IPA}}",
+        "",
+        "===Etymology 1===",
+        "{{ko-etym-Sino|\19968|one|\26376|month}}",
+        "",
+        "====Alternative forms====",
+        "* {{ko-l|1\50900}}",
+        "",
+        "====Noun====",
+        "{{ko-noun|hanja=[[\19968\26376]]\65295[[1\26376]]}}",
+        "",
+        "# [[January]]",
+        "",
+        "====See also====",
+        "* {{ko-l|\51221\50900||first month of the traditional Korean calendar|\27491\26376}}",
+        "",
+        "===Etymology 2===",
+        "{{ko-etym-Sino|\26085|sun|\26376|moon}}",
+        "",
+        "===Noun===",
+        "{{ko-noun|hanja=\26085\26376}}",
+        "",
+        "# [[sun]] and [[moon]]",
+        "",
+        "{{topics|ko|Months}}"]
